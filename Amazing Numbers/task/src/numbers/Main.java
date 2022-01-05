@@ -1,28 +1,58 @@
 package numbers;
 import java.util.*;
 
+class Number {
+    private int num;
+    private boolean duck;
+    private boolean buzz;
+    private boolean even;
+
+    public Number(int number) {
+        if (number < 1) {
+            System.out.println("This number is not natural!");
+            return;
+        }
+        this.num = number;
+        this.duck = String.valueOf(this.num).contains("0");
+        this.buzz = this.num % 10 == 7 || this.num % 7 == 0;
+        this.even = this.num % 2 == 0;
+    }
+
+
+    public int getNum() {
+        return this.num;
+    }
+
+    public boolean isDuck() {
+        return this.duck;
+    }
+
+    public boolean isBuzz() {
+        return this.buzz;
+    }
+
+    public boolean isEven() {
+        return this.even;
+    }
+
+    public void printProperties() {
+        System.out.printf("Properties of %d\n", this.num);
+        System.out.printf("even: %b\n", this.even);
+        System.out.printf("odd: %b\n", !this.even);
+        System.out.printf("buzz: %b\n", this.buzz);
+        System.out.printf("duck: %b\n", this.duck);
+    }
+}
+
 public class Main {
     public static void main(String[] args) {
         Scanner scanner = new Scanner(System.in);
 
         System.out.println("Enter a natural number: ");
-        int number = scanner.nextInt();
+        Number number = new Number(scanner.nextInt());
 
-        if (number < 1) {
-            System.out.println("This number is not natural!");
-        } else {
-            boolean doesEndIn7 = number % 10 == 7;
-            boolean isDivisible7 = number % 7 == 0;
-            boolean isBuzz = doesEndIn7 || isDivisible7;
+        number.printProperties();
 
-            String parity = number % 2 == 0 ? "This number is Even" : "This number is Odd";
-            String buzz = isBuzz ? "It is a Buzz number." : "It is not a Buzz number.";
-            String explanation = isBuzz ?
-                    doesEndIn7 && isDivisible7 ? "is divisible by 7 and ends with 7."
-                            : doesEndIn7 ? "ends with 7." : "is divisible by 7."
-                    : "is neither divisible by 7 nor does it end with 7";
 
-            System.out.printf("%s\n%s\nExplanation:\n%d %s", parity, buzz, number, explanation);
-        }
     }
 }
