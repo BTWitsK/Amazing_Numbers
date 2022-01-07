@@ -2,11 +2,12 @@ package numbers;
 import java.util.*;
 
 class Number {
-    private long num;
-    private boolean duck;
-    private boolean buzz;
-    private boolean even;
-    private boolean palindromic;
+    private final long num;
+    private final boolean duck;
+    private final boolean buzz;
+    private final boolean even;
+    private final boolean palindromic;
+    private final boolean gapful;
 
     public Number(long number) {
         this.num = number;
@@ -14,23 +15,16 @@ class Number {
         this.buzz = this.num % 10 == 7 || this.num % 7 == 0;
         this.even = this.num % 2 == 0;
         this.palindromic = isPalindromic(number);
+        this.gapful = isGapful(number);
     }
 
+    public boolean isGapful(long number) {
+        char[] array = String.valueOf(number).toCharArray();
+        int firstDigit = Character.digit(array[0], 10);
+        int lastDigit = Character.digit(array[array.length - 1], 10);
+        int concact = firstDigit * 10 + lastDigit;
 
-    public long getNum() {
-        return this.num;
-    }
-
-    public boolean isDuck() {
-        return this.duck;
-    }
-
-    public boolean isBuzz() {
-        return this.buzz;
-    }
-
-    public boolean isEven() {
-        return this.even;
+        return String.valueOf(number).length() > 2 && number % concact == 0;
     }
 
     public boolean isPalindromic(long number) {
@@ -55,33 +49,105 @@ class Number {
         System.out.printf("buzz: %b\n", this.buzz);
         System.out.printf("duck: %b\n", this.duck);
         System.out.printf("palindromic: %b\n", this.palindromic);
+        System.out.printf("gapful: %b\n", this.gapful);
+
+    }
+
+    public static void printList(List<Number> list) {
+        StringBuilder output = new StringBuilder();
+
+        for (Number number : list) {
+            output.append(number.num).append(" is");
+
+            if (number.buzz) {
+                output.append(" buzz,");
+            }
+            if (number.duck) {
+                output.append(" duck,");
+            }
+            if (number.gapful) {
+                output.append(" gapful,");
+            }
+            if (number.palindromic) {
+                output.append(" palindromic,");
+            }
+            if (number.even) {
+                output.append(" even.");
+            } else {
+                output.append(" odd.");
+            }
+            output.append("\n");
+        }
+
+        System.out.println(output);
+    }
+
+    public static void printInstructions(){
+        System.out.print("Welcome to Amazing Numbers!\n\n Supported requests:\n");
+        System.out.print("- enter a natural number to know its properties;\n");
+        System.out.print("- enter two natural numbers to obtain the properties of the list:\n");
+        System.out.print(" * the first parameter represents a starting number; \n");
+        System.out.print(" * the second parameter shows how many consecutive numbers are to be processed\n");
+        System.out.print("- separate the parameters with one space;\n");
+        System.out.print("- enter 0 to exit.\n");
+    }
+
+    public static List<String> inputRequest() {
+        Scanner scanner = new Scanner(System.in);
+        System.out.println("Enter a request: ");
+        String input = scanner.nextLine();
+
+        if (" ".equals(input) || "".equals(input)) {
+            printInstructions();
+            return inputRequest();
+        }
+
+        List<String> list = Arrays.asList(input.split(" "));
+
+        try {
+            Long.parseLong(list.get(0));
+        } catch (NumberFormatException error) {
+            System.out.println("The first parameter should be a natural number or zero");
+            return inputRequest();
+        }
+
+        if (Long.parseLong(list.get(0)) < 0) {
+            System.out.println("The first parameter should be a natural number or zero.");
+            return inputRequest();
+        }
+
+        if (list.size() > 1 && Long.parseLong(list.get(1)) < 1) {
+            System.out.println("The second parameter should be a natural number.");
+            return inputRequest();
+        }
+
+        return list;
     }
 }
 
 public class Main {
     public static void main(String[] args) {
-        Scanner scanner = new Scanner(System.in);
-        System.out.print("Welcome to Amazing Numbers!\n\n Supported requests:\n");
-        System.out.print("- enter a natural number to know its properties;\n- enter 0 to exit.\n");
-        System.out.println("Enter a request: ");
-        long input = scanner.nextLong();
+        Number.printInstructions();
+        List<Number> numList = new ArrayList<>();
+        List<String> requestList;
+        long firstParam;
 
+       do {
+           requestList = Number.inputRequest();
+           firstParam = Long.parseLong(requestList.get(0));
 
-        while (input != 0) {
+           if (requestList.size() == 1) {
+               Number number = new Number(firstParam);
+               number.printProperties();
+           } else {
+               long secondParam = Long.parseLong(requestList.get(1));
+               for (int i = 0; i < secondParam; i++) {
+                   numList.add(new Number(firstParam + i));
+               }
+               Number.printList(numList);
+           }
+       } while (firstParam != 0);
 
-            if (input < 0) {
-                System.out.println("The first parameter should be a natural number or zero.");
-                System.out.println("Enter a request: ");
-                input = scanner.nextLong();
-                continue;
-            }
-
-            Number number = new Number(input);
-            number.printProperties();
-
-            System.out.println("Enter a request: ");
-            input = scanner.nextLong();
-        }
-        System.out.print("Goodbye!");
+       System.out.print("Goodbye!");
     }
 }
