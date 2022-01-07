@@ -179,45 +179,59 @@ class Number {
         if (list.size() > 2 && !Number.properties.contains(list.get(2).toLowerCase())) {
             System.out.printf("The Property [%s] is wrong.\n", list.get(2));
             System.out.printf("Available properties: %s\n", Number.properties);
+            return inputRequest();
 
         }
 
         return list;
     }
-}
 
-public class Main {
-    public static void main(String[] args) {
-        Number.printInstructions();
+    public static void processRequest(List<String> requestList) {
         List<Number> numList = new ArrayList<>();
-        List<Number> searchList = new ArrayList<>();
-        long firstParam;
+        long firstParam = Long.parseLong(requestList.get(0));
 
-        do {
-            List<String> requestList = Number.inputRequest();
-            firstParam = Long.parseLong(requestList.get(0));
+        if (requestList.size() == 1) {
+            Number number = new Number(firstParam);
+            number.printProperties();
+        }
 
-            if (requestList.size() == 1) {
-                Number number = new Number(firstParam);
-                number.printProperties();
-            } else {
-                long secondParam = Long.parseLong(requestList.get(1));
-                for (int i = 0; i < secondParam; i++) {
-                    Number number = new Number(firstParam + i);
-                    if (requestList.size() == 3 && number.property.contains(requestList.get(2).toLowerCase())) {
-                        searchList.add(number);
-                    } else {
-                        numList.add(number);
-                    }
-                }
+        if (requestList.size() == 2) {
+            long secondParam = Long.parseLong(requestList.get(1));
 
-                if (requestList.size() == 3) {
-                    Number.printList(searchList);
-                } else {
-                    Number.printList(numList);
+            for (int i = 0; i < secondParam; i++) {
+                Number number = new Number(firstParam + i);
+                numList.add(number);
+            }
+            printList(numList);
+        }
+
+        if (requestList.size() == 3) {
+            long secondParam = Long.parseLong(requestList.get(1));
+            int counter = 0;
+
+            for (long i = firstParam; counter < secondParam; i++) {
+                Number number = new Number(i);
+                if (number.property.contains(requestList.get(2).toLowerCase())) {
+                    numList.add(number);
+                    counter++;
                 }
             }
-        } while (firstParam != 0);
+            printList(numList);
+        }
+    }
+}
+
+    public class Main {
+        public static void main(String[] args) {
+            Number.printInstructions();
+            long firstParam;
+
+            do {
+                List<String> requestList = Number.inputRequest();
+                Number.processRequest(requestList);
+                firstParam = Long.parseLong(requestList.get(0));
+
+            } while (firstParam!= 0);
 
         System.out.print("Goodbye!");
     }
