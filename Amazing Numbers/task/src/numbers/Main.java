@@ -6,16 +6,37 @@ class Number {
     private final boolean duck;
     private final boolean buzz;
     private final boolean even;
+    private final boolean odd;
     private final boolean palindromic;
     private final boolean gapful;
+    private final boolean spy;
+    final String property;
+    private static final String properties = "buzz, duck, even, odd, palindromic, gapful, spy";
+
 
     public Number(long number) {
         this.num = number;
         this.duck = String.valueOf(this.num).contains("0");
         this.buzz = this.num % 10 == 7 || this.num % 7 == 0;
         this.even = this.num % 2 == 0;
+        this.odd = !this.even;
         this.palindromic = isPalindromic(number);
         this.gapful = isGapful(number);
+        this.spy = isSpy(number);
+        this.property = setProperties(number);
+    }
+
+    public boolean isSpy(long number) {
+        String[] numList = String.valueOf(number).split("");
+        long sum = 0;
+        long mul = 1;
+
+        for (String num : numList) {
+            sum += Integer.parseInt(num);
+            mul *= Integer.parseInt(num);
+        }
+
+        return sum == mul;
     }
 
     public boolean isGapful(long number) {
@@ -42,14 +63,42 @@ class Number {
         return true;
     }
 
+    public String setProperties(long number) {
+        StringBuilder output = new StringBuilder();
+
+            if (number % 10 == 7 || number % 7 == 0) {
+                output.append(" buzz,");
+            }
+            if (String.valueOf(number).contains("0")) {
+                output.append(" duck,");
+            }
+            if (isGapful(number)) {
+                output.append(" gapful,");
+            }
+            if (isPalindromic(number)) {
+                output.append(" palindromic,");
+            }
+            if (isSpy(number)) {
+                output.append(" spy,");
+            }
+            if (this.num % 2 == 0) {
+                output.append(" even.");
+            } else {
+                output.append(" odd.");
+            }
+
+            return output.toString();
+    }
+
     public void printProperties() {
         System.out.printf("Properties of %s\n", num);
         System.out.printf("even: %b\n", this.even);
-        System.out.printf("odd: %b\n", !this.even);
+        System.out.printf("odd: %b\n", this.odd);
         System.out.printf("buzz: %b\n", this.buzz);
         System.out.printf("duck: %b\n", this.duck);
         System.out.printf("palindromic: %b\n", this.palindromic);
         System.out.printf("gapful: %b\n", this.gapful);
+        System.out.printf("spy: %b\n", this.spy);
 
     }
 
@@ -71,9 +120,13 @@ class Number {
             if (number.palindromic) {
                 output.append(" palindromic,");
             }
+            if (number.spy) {
+                output.append(" spy,");
+            }
             if (number.even) {
                 output.append(" even.");
-            } else {
+            }
+            if (number.odd) {
                 output.append(" odd.");
             }
             output.append("\n");
@@ -82,19 +135,21 @@ class Number {
         System.out.println(output);
     }
 
+
     public static void printInstructions(){
         System.out.print("Welcome to Amazing Numbers!\n\n Supported requests:\n");
         System.out.print("- enter a natural number to know its properties;\n");
         System.out.print("- enter two natural numbers to obtain the properties of the list:\n");
         System.out.print(" * the first parameter represents a starting number; \n");
         System.out.print(" * the second parameter shows how many consecutive numbers are to be processed\n");
+        System.out.print("- two natural numbers and a property to search for;\n");
         System.out.print("- separate the parameters with one space;\n");
         System.out.print("- enter 0 to exit.\n");
     }
 
     public static List<String> inputRequest() {
         Scanner scanner = new Scanner(System.in);
-        System.out.println("Enter a request: ");
+        System.out.println("Enter a request: \n");
         String input = scanner.nextLine();
 
         if (" ".equals(input) || "".equals(input)) {
@@ -121,6 +176,12 @@ class Number {
             return inputRequest();
         }
 
+        if (list.size() > 2 && !Number.properties.contains(list.get(2).toLowerCase())) {
+            System.out.printf("The Property [%s] is wrong.\n", list.get(2));
+            System.out.printf("Available properties: %s\n", Number.properties);
+
+        }
+
         return list;
     }
 }
@@ -129,25 +190,35 @@ public class Main {
     public static void main(String[] args) {
         Number.printInstructions();
         List<Number> numList = new ArrayList<>();
-        List<String> requestList;
+        List<Number> searchList = new ArrayList<>();
         long firstParam;
 
-       do {
-           requestList = Number.inputRequest();
-           firstParam = Long.parseLong(requestList.get(0));
+        do {
+            List<String> requestList = Number.inputRequest();
+            firstParam = Long.parseLong(requestList.get(0));
 
-           if (requestList.size() == 1) {
-               Number number = new Number(firstParam);
-               number.printProperties();
-           } else {
-               long secondParam = Long.parseLong(requestList.get(1));
-               for (int i = 0; i < secondParam; i++) {
-                   numList.add(new Number(firstParam + i));
-               }
-               Number.printList(numList);
-           }
-       } while (firstParam != 0);
+            if (requestList.size() == 1) {
+                Number number = new Number(firstParam);
+                number.printProperties();
+            } else {
+                long secondParam = Long.parseLong(requestList.get(1));
+                for (int i = 0; i < secondParam; i++) {
+                    Number number = new Number(firstParam + i);
+                    if (requestList.size() == 3 && number.property.contains(requestList.get(2).toLowerCase())) {
+                        searchList.add(number);
+                    } else {
+                        numList.add(number);
+                    }
+                }
 
-       System.out.print("Goodbye!");
+                if (requestList.size() == 3) {
+                    Number.printList(searchList);
+                } else {
+                    Number.printList(numList);
+                }
+            }
+        } while (firstParam != 0);
+
+        System.out.print("Goodbye!");
     }
 }
