@@ -10,8 +10,10 @@ class Number {
     private final boolean palindromic;
     private final boolean gapful;
     private final boolean spy;
+    private final boolean sunny;
+    private final boolean square;
     final String property;
-    private static final String properties = "buzz, duck, even, odd, palindromic, gapful, spy";
+    private static final String properties = "buzz, duck, even, odd, palindromic, gapful, spy, sunny, square";
 
 
     public Number(long number) {
@@ -23,7 +25,13 @@ class Number {
         this.palindromic = isPalindromic(number);
         this.gapful = isGapful(number);
         this.spy = isSpy(number);
+        this.sunny = isSquare(number + 1);
+        this.square = isSquare(number);
         this.property = setProperties(number);
+    }
+
+    public boolean isSquare(long number) {
+        return Math.sqrt(number) % 1 == 0;
     }
 
     public boolean isSpy(long number) {
@@ -35,7 +43,6 @@ class Number {
             sum += Integer.parseInt(num);
             mul *= Integer.parseInt(num);
         }
-
         return sum == mul;
     }
 
@@ -81,12 +88,17 @@ class Number {
             if (isSpy(number)) {
                 output.append(" spy,");
             }
+            if (isSquare(number)) {
+                output.append(" square,");
+            }
+            if (isSquare(number + 1)) {
+                output.append(" sunny,");
+            }
             if (this.num % 2 == 0) {
                 output.append(" even.");
             } else {
                 output.append(" odd.");
             }
-
             return output.toString();
     }
 
@@ -99,6 +111,8 @@ class Number {
         System.out.printf("palindromic: %b\n", this.palindromic);
         System.out.printf("gapful: %b\n", this.gapful);
         System.out.printf("spy: %b\n", this.spy);
+        System.out.printf("sunny: %b\n", this.sunny);
+        System.out.printf("square: %b\n\n", this.square);
 
     }
 
@@ -123,6 +137,12 @@ class Number {
             if (number.spy) {
                 output.append(" spy,");
             }
+            if (number.square) {
+                output.append(" square,");
+            }
+            if (number.sunny) {
+                output.append(" sunny,");
+            }
             if (number.even) {
                 output.append(" even.");
             }
@@ -131,7 +151,6 @@ class Number {
             }
             output.append("\n");
         }
-
         System.out.println(output);
     }
 
@@ -142,13 +161,15 @@ class Number {
         System.out.print("- enter two natural numbers to obtain the properties of the list:\n");
         System.out.print(" * the first parameter represents a starting number; \n");
         System.out.print(" * the second parameter shows how many consecutive numbers are to be processed\n");
-        System.out.print("- two natural numbers and a property to search for;\n");
+        System.out.print("- two natural numbers and two properties to search for;\n");
         System.out.print("- separate the parameters with one space;\n");
         System.out.print("- enter 0 to exit.\n");
     }
 
     public static List<String> inputRequest() {
         Scanner scanner = new Scanner(System.in);
+        String[] exclusive = {"[even, odd]", "[odd, even]", "[duck, spy]",
+                "[spy, duck]", "[sunny, square]", "[square, sunny]"};
         System.out.println("Enter a request: \n");
         String input = scanner.nextLine();
 
@@ -176,47 +197,97 @@ class Number {
             return inputRequest();
         }
 
-        if (list.size() > 2 && !Number.properties.contains(list.get(2).toLowerCase())) {
+        if (list.size() == 3 && !Number.properties.contains(list.get(2).toLowerCase())) {
             System.out.printf("The Property [%s] is wrong.\n", list.get(2));
             System.out.printf("Available properties: %s\n", Number.properties);
             return inputRequest();
-
         }
 
+        if (list.size() > 3) {
+            String firstProperty = list.get(2).toLowerCase();
+            String secondProperty = list.get(3).toLowerCase();
+            String paramPair = String.format("[%s, %s]", firstProperty, secondProperty);
+
+            if (!Number.properties.contains(firstProperty) && Number.properties.contains(secondProperty)) {
+                System.out.printf("The Property [%s] is wrong.\n", firstProperty);
+                System.out.printf("Available properties: %s\n", Number.properties);
+                return inputRequest();
+            }
+
+            if (!Number.properties.contains(secondProperty) && Number.properties.contains(firstProperty)) {
+                System.out.printf("The Property [%s] is wrong.\n", secondProperty);
+                System.out.printf("Available properties: %s\n", Number.properties);
+                return inputRequest();
+            }
+
+            if (!Number.properties.contains(firstProperty) && !Number.properties.contains(secondProperty)) {
+                System.out.printf("The properties %s are wrong.\n", paramPair);
+                System.out.printf("Available properties: %s\n", Number.properties);
+                return inputRequest();
+            }
+
+            for (String pair : exclusive) {
+                if (pair.contains(paramPair)){
+                    System.out.printf("The request contains mutually exclusive properties: %s\n",paramPair);
+                    System.out.println("There are no numbers with these properties.");
+                    return inputRequest();
+                }
+            }
+        }
         return list;
     }
 
     public static void processRequest(List<String> requestList) {
         List<Number> numList = new ArrayList<>();
+        Number number;
         long firstParam = Long.parseLong(requestList.get(0));
+        int size = requestList.size();
+        int counter = 0;
 
-        if (requestList.size() == 1) {
-            Number number = new Number(firstParam);
-            number.printProperties();
-        }
+        switch (size) {
+            case 1:
+                number = new Number(firstParam);
+                number.printProperties();
+                break;
 
-        if (requestList.size() == 2) {
-            long secondParam = Long.parseLong(requestList.get(1));
+            case 2:
+                long secondParam = Long.parseLong(requestList.get(1));
 
-            for (int i = 0; i < secondParam; i++) {
-                Number number = new Number(firstParam + i);
-                numList.add(number);
-            }
-            printList(numList);
-        }
-
-        if (requestList.size() == 3) {
-            long secondParam = Long.parseLong(requestList.get(1));
-            int counter = 0;
-
-            for (long i = firstParam; counter < secondParam; i++) {
-                Number number = new Number(i);
-                if (number.property.contains(requestList.get(2).toLowerCase())) {
+                for (int i = 0; i < secondParam; i++) {
+                    number = new Number(firstParam + i);
                     numList.add(number);
-                    counter++;
                 }
-            }
-            printList(numList);
+                printList(numList);
+                break;
+
+            case 3:
+                secondParam = Long.parseLong(requestList.get(1));
+                String thirdParam = requestList.get(2).toLowerCase();
+
+                for (long i = firstParam; counter < secondParam; i++) {
+                    number = new Number(i);
+                    if (number.property.contains(thirdParam)) {
+                        numList.add(number);
+                        counter++;
+                    }
+                }
+                printList(numList);
+                break;
+
+            case 4:
+                secondParam = Long.parseLong(requestList.get(1));
+                thirdParam = requestList.get(2).toLowerCase();
+                String fourthParam = requestList.get(3).toLowerCase();
+
+                for (long i = firstParam; counter < secondParam; i++) {
+                    number = new Number(i);
+                    if (number.property.contains(thirdParam) && number.property.contains(fourthParam)) {
+                        numList.add(number);
+                        counter++;
+                    }
+                }
+                printList(numList);
+                break;
         }
     }
 }
