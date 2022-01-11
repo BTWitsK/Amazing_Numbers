@@ -1,6 +1,29 @@
 package numbers;
 import java.util.*;
 
+enum Properties {
+    DUCK("duck"),
+    BUZZ("buzz"),
+    EVEN("even"),
+    ODD("odd"),
+    PALINDROMIC("palindromic"),
+    GAPFUL("gapful"),
+    SPY("spy"),
+    SUNNY("sunny"),
+    SQUARE("square"),
+    JUMPING("jumping");
+
+    final String property;
+
+    Properties(String property) {
+        this.property = property;
+    }
+
+    public String getProperty() {
+        return this.property;
+    }
+}
+
 class Number {
     private final long num;
     private final boolean duck;
@@ -12,8 +35,10 @@ class Number {
     private final boolean spy;
     private final boolean sunny;
     private final boolean square;
-    final String property;
-    private static final String properties = "buzz, duck, even, odd, palindromic, gapful, spy, sunny, square";
+    private final boolean jumping;
+    List<Properties> property;
+
+    Properties properties;
 
 
     public Number(long number) {
@@ -27,7 +52,12 @@ class Number {
         this.spy = isSpy(number);
         this.sunny = isSquare(number + 1);
         this.square = isSquare(number);
+        this.jumping = isJumping(number);
         this.property = setProperties(number);
+    }
+
+    public boolean isJumping(long number) {
+        
     }
 
     public boolean isSquare(long number) {
@@ -70,36 +100,36 @@ class Number {
         return true;
     }
 
-    public String setProperties(long number) {
-        StringBuilder output = new StringBuilder();
+    public List<Properties> setProperties(long number) {
+        List<Properties> list = new ArrayList<>();
 
             if (number % 10 == 7 || number % 7 == 0) {
-                output.append(" buzz,");
+                list.add(Properties.BUZZ);
             }
             if (String.valueOf(number).contains("0")) {
-                output.append(" duck,");
+                list.add(Properties.DUCK);
             }
             if (isGapful(number)) {
-                output.append(" gapful,");
+                list.add(Properties.GAPFUL);
             }
             if (isPalindromic(number)) {
-                output.append(" palindromic,");
+                list.add(Properties.PALINDROMIC);
             }
             if (isSpy(number)) {
-                output.append(" spy,");
+                list.add(Properties.SPY);
             }
             if (isSquare(number)) {
-                output.append(" square,");
+                list.add(Properties.SQUARE);
             }
             if (isSquare(number + 1)) {
-                output.append(" sunny,");
+                list.add(Properties.SUNNY);
             }
             if (this.num % 2 == 0) {
-                output.append(" even.");
+                list.add(Properties.EVEN);
             } else {
-                output.append(" odd.");
+                list.add(Properties.ODD);
             }
-            return output.toString();
+            return list;
     }
 
     public void printProperties() {
@@ -161,7 +191,7 @@ class Number {
         System.out.print("- enter two natural numbers to obtain the properties of the list:\n");
         System.out.print(" * the first parameter represents a starting number; \n");
         System.out.print(" * the second parameter shows how many consecutive numbers are to be processed\n");
-        System.out.print("- two natural numbers and two properties to search for;\n");
+        System.out.print("- two natural numbers and properties to search for;\n");
         System.out.print("- separate the parameters with one space;\n");
         System.out.print("- enter 0 to exit.\n");
     }
