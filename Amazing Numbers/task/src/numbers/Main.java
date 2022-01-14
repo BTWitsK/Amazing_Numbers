@@ -34,7 +34,6 @@ enum Properties {
         for (Properties properties : Properties.values()) {
             stringBuilder.append(String.format("%s, ", properties.property));
         }
-
         return stringBuilder.toString();
     }
 }
@@ -54,9 +53,8 @@ class Number {
     List<Properties> properties;
     final static String[] exclusive = {"[even, odd]", "[odd, even]", "[duck, spy]",
             "[spy, duck]", "[sunny, square]", "[square, sunny]"};
-
+    final static String mutuallyExclusive = "even odd duck spy sunny square";
     static Properties availableProperties;
-
 
     public Number(long number) {
         this.num = number;
@@ -82,7 +80,7 @@ class Number {
 
         for (int i = 1; i < numbers.length ; i++) {
             long dif = Math.abs(Long.parseLong(numbers[i - 1]) - Long.parseLong(numbers[i]));
-            if (dif > 1) {
+            if (dif != 1) {
                 return false;
             }
         }
@@ -221,24 +219,37 @@ class Number {
         return 0;
     }
 
+    public static int correctProperty(List<String> properties) {
+        int count = 0;
+        for (String property : properties) {
+            for (String exclusiveProperty : mutuallyExclusive.split(" ")) {
+                if (exclusiveProperty == property) {
+                    count++;
+                }
+            }
+        }
+        if (count > 1) return -1;
+        return 0;
+    }
+
     public static int correctProperty(String firstProperty, String secondProperty) {
         String paramPair = String.format("[%s, %s]", firstProperty, secondProperty);
 
         if (!Properties.containsProperty(firstProperty) && Properties.containsProperty(secondProperty)) {
             System.out.printf("The Property [%s] is wrong.\n", firstProperty);
-            System.out.printf("Available properties: %s\n", Number.availableProperties);
+            System.out.printf("Available properties: %s\n", Properties.getProperties());
             return -1;
         }
 
         if (!Properties.containsProperty(secondProperty) && Properties.containsProperty(firstProperty)) {
             System.out.printf("The Property [%s] is wrong.\n", secondProperty);
-            System.out.printf("Available properties: %s\n", Number.availableProperties);
+            System.out.printf("Available properties: %s\n", Properties.getProperties());
             return -1;
         }
 
         if (!Properties.containsProperty(firstProperty) && !Properties.containsProperty(secondProperty)) {
             System.out.printf("The properties %s are wrong.\n", paramPair);
-            System.out.printf("Available properties: %s\n", Number.availableProperties);
+            System.out.printf("Available properties: %s\n", Properties.getProperties());
             return -1;
         }
 
@@ -282,7 +293,7 @@ class Number {
         }
 
         if (list.size() == 3 ){
-            if (correctProperty(list.get(2)) < 0) {
+            if (correctProperty(list.get(2).toLowerCase()) < 0) {
                 return inputRequest();
             }
         }
@@ -300,6 +311,9 @@ class Number {
                     return inputRequest();
                 }
             }
+            /*if (correctProperty(list) < 0) {
+                return inputRequest();
+            }*/
         }
         return list;
     }
@@ -357,7 +371,28 @@ class Number {
                 break;
 
             default:
+                secondParam = Long.parseLong(requestList.get(1));
+                List<String> propertyList = new ArrayList<>();
 
+                for (int i = 2; i < requestList.size(); i++) {
+                    propertyList.add(requestList.get(i).toLowerCase());
+                }
+
+                for (long i = firstParam; counter < secondParam; i++) {
+                    boolean containsAllProperties = true;
+                    number = new Number(i);
+                    for (String property : propertyList) {
+                        if (!number.containsProperty(property)) {
+                            containsAllProperties = false;
+                            break;
+                        }
+                    }
+                    if (containsAllProperties) {
+                        numList.add(number);
+                        counter++;
+                    }
+                }
+                printProperties(numList);
         }
     }
 }
